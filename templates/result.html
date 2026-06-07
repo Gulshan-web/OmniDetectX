@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OmniDetectX Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #020617;
+            color: white;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #38bdf8;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+
+        img {
+            width: 100%;
+            border-radius: 14px;
+            margin-top: 10px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 18px;
+            background: #38bdf8;
+            color: #020617;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #0ea5e9;
+        }
+
+        @media (max-width: 800px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>OmniDetectX Analysis Result</h1>
+    <p>AI-generated multimodal image analysis report</p>
+</div>
+
+<div class="dashboard">
+    <div class="card">
+        <h2>Uploaded Image</h2>
+        <img src="{{ image_path }}">
+        <a class="btn" href="/">Analyze Another Image</a>
+    </div>
+
+    <div class="card">
+        <h2>Final Report</h2>
+        <pre>{{ report }}</pre>
+    </div>
+</div>
+
+</body>
+</html>

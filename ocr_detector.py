@@ -7,51 +7,31 @@ reader = easyocr.Reader(['en'], gpu=False)
 def is_garbage_text(text):
     text = text.strip()
 
-    # very short text ignore
     if len(text) < 3:
         return True
 
-    # mostly symbols/numbers ignore
     letters = sum(c.isalpha() for c in text)
-    digits = sum(c.isdigit() for c in text)
 
     if letters == 0:
         return True
 
-    # too many random symbols
     if re.fullmatch(r"[^a-zA-Z]+", text):
-        return True
-
-    # random short mixed text like Dd, 0o, 79g
-    if len(text) <= 4 and digits > 0:
         return True
 
     return False
 
 
-def extract_text(image_path):
-    image = cv2.imread(image_path)
-
-    if image is None:
-        print("Image not found:", image_path)
-        return []
-
-    # resize for better OCR
-    image = cv2.resize(image, None, fx=1.5, fy=1.5)
-
+def run_ocr_on_image(image):
     results = reader.readtext(image)
-
     texts = []
 
     for item in results:
         text = item[1].strip()
         confidence = round(item[2] * 100, 2)
 
-        # confidence filter
-        if confidence < 70:
+        if confidence < 45:
             continue
 
-        # garbage filter
         if is_garbage_text(text):
             continue
 
@@ -63,9 +43,39 @@ def extract_text(image_path):
     return texts
 
 
+def extract_text(image_path):
+    image = cv2.imread(image_path)
+
+    if image is None:
+        print("Image not found:", image_path)
+        return []
+
+    image = cv2.resize(image, None, fx=1.5, fy=1.5)
+
+    rotations = [
+        image,
+        cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE),
+        cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    ]
+
+    final_texts = []
+    seen = set()
+
+    for rotated in rotations:
+        texts = run_ocr_on_image(rotated)
+
+        for item in texts:
+            key = item["text"].lower()
+
+            if key not in seen:
+                seen.add(key)
+                final_texts.append(item)
+
+    return final_texts
+
+
 if __name__ == "__main__":
     image_path = "input/sample.jpg"
-
     extracted = extract_text(image_path)
 
     print("\nExtracted Text:\n")

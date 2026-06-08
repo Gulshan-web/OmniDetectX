@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+.git/
+static/uploads/
+static/results/
+output/
+*.db
+*.pyc

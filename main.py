@@ -1,12 +1,6 @@
 import os
 
-from object_detector import detect_objects_image
-from ocr_detector import extract_text
-from handwriting_detector import read_handwriting
-from authenticity_predict import predict_authenticity
-from scene_understanding import understand_scene
 from database import create_database, save_scan
-from florence_understanding import florence_caption
 
 
 def merge_objects(yolo_objects, open_objects):
@@ -87,31 +81,32 @@ def generate_report(image_path):
     print("Processing image:", image_path)
 
     print("\n[1] YOLO Object Detection...")
-    yolo_objects, object_output = detect_objects_image(image_path)
+    try:
+        from object_detector import detect_objects_image
+        yolo_objects, object_output = detect_objects_image(image_path)
+    except Exception as e:
+        print("YOLO failed:", e)
+        yolo_objects = []
+        object_output = "No output image"
 
     print("\n[1.5] Grounding DINO Open Object Detection...")
     try:
         from grounding_dino_detector import detect_open_objects
-
         open_objects, open_object_output = detect_open_objects(image_path)
-
-        objects = merge_objects(
-            yolo_objects,
-            open_objects
-        )
-
+        objects = merge_objects(yolo_objects, open_objects)
     except Exception as e:
         print("Grounding DINO failed:", e)
-
         objects = yolo_objects
         open_object_output = None
 
     print("\n[2] Printed Text OCR...")
     try:
+        from ocr_detector import extract_text
         printed_text = extract_text(image_path)
     except Exception as e:
         print("OCR failed:", e)
-    printed_text = []
+        printed_text = []
+
     print("\n[3] Handwriting Recognition...")
 
     filename_lower = os.path.basename(image_path).lower()
@@ -134,28 +129,33 @@ def generate_report(image_path):
 
     if should_check_handwriting:
         try:
+            from handwriting_detector import read_handwriting
             handwriting_text = read_handwriting(image_path)
             clean_text = handwriting_text.strip()
 
             if len(clean_text) < 20:
                 handwriting_text = "No handwriting detected"
 
-        except Exception:
+        except Exception as e:
+            print("Handwriting failed:", e)
             handwriting_text = "No handwriting detected"
     else:
         handwriting_text = "No handwriting detected"
 
     print("\n[4] Florence-2 Scene Understanding...")
     try:
+        from florence_understanding import florence_caption
         scene_caption = florence_caption(image_path)
 
     except Exception as e:
         print("Florence failed:", e)
 
         try:
+            from scene_understanding import understand_scene
             scene_caption = understand_scene(image_path)
 
-        except Exception:
+        except Exception as e:
+            print("BLIP failed:", e)
             scene_caption = "Scene understanding failed"
 
     if len(scene_caption) > 300:
@@ -163,11 +163,15 @@ def generate_report(image_path):
 
     print("\n[5] AI vs Real Image Detection...")
     try:
-        authenticity_result, authenticity_confidence = predict_authenticity(image_path)
+        from authenticity_predict import predict_authenticity
+        authenticity_result, authenticity_confidence = predict_authenticity(
+            image_path
+        )
     except Exception as e:
         print("Authenticity failed:", e)
-    authenticity_result = "Unknown"
-    authenticity_confidence = 0
+        authenticity_result = "Unknown"
+        authenticity_confidence = 0
+
     object_names = [obj["object"] for obj in objects]
     objects_string = ", ".join(object_names)
 

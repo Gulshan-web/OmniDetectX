@@ -9,11 +9,23 @@ MODEL_ID = "IDEA-Research/grounding-dino-tiny"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-processor = AutoProcessor.from_pretrained(MODEL_ID)
-model = AutoModelForZeroShotObjectDetection.from_pretrained(MODEL_ID).to(device)
+processor = None
+model = None
+
+def load_grounding_dino():
+    global processor, model
+
+    if processor is None:
+        processor = AutoProcessor.from_pretrained(MODEL_ID)
+
+    if model is None:
+        model = AutoModelForZeroShotObjectDetection.from_pretrained(
+            MODEL_ID
+        ).to(device)
+
+    return processor, model
 
 DEFAULT_OBJECT_PROMPT = (
-    "books. papers. bags. plants. people. animals. "
     "bottle. water bottle. pen. pencil. mouse. computer mouse. "
     "gaming mouse. mousepad. desk mat. notebook. tablet. tablet cover. "
     "book. charger. cable. wire. adapter. desk. table. phone. keyboard. "
@@ -87,7 +99,7 @@ def is_valid_label(label, confidence):
     if len(label) < 3:
         return False
 
-    if confidence < 35:
+    if confidence < 55:
         return False
 
     generic_words = [
@@ -107,6 +119,7 @@ def is_valid_label(label, confidence):
 
 
 def detect_open_objects(image_path, output_dir="output"):
+    processor, model = load_grounding_dino()
     os.makedirs(output_dir, exist_ok=True)
 
     image = Image.open(image_path).convert("RGB")
@@ -123,8 +136,8 @@ def detect_open_objects(image_path, output_dir="output"):
     results = processor.post_process_grounded_object_detection(
     outputs,
     inputs.input_ids,
-    box_threshold=0.20,
-    text_threshold=0.20,
+    box_threshold=0.45,
+    text_threshold=0.40,
     target_sizes=[image.size[::-1]]
     )[0]
 

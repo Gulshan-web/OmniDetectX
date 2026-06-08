@@ -1,7 +1,6 @@
 venv/
 __pycache__/
 
-models/
 static/uploads/
 static/results/
 
@@ -9,6 +8,3 @@ output/
 
 *.db
 *.pyc
-
-
-yolov8m.pt

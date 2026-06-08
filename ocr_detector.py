@@ -1,8 +1,18 @@
-import easyocr
 import cv2
 import re
 
-reader = easyocr.Reader(['en'], gpu=False)
+reader = None
+
+
+def get_reader():
+    global reader
+
+    if reader is None:
+        import easyocr
+        reader = easyocr.Reader(['en'], gpu=False)
+
+    return reader
+
 
 def is_garbage_text(text):
     text = text.strip()
@@ -22,7 +32,8 @@ def is_garbage_text(text):
 
 
 def run_ocr_on_image(image):
-    results = reader.readtext(image)
+    ocr_reader = get_reader()
+    results = ocr_reader.readtext(image)
     texts = []
 
     for item in results:

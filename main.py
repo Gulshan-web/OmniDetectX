@@ -162,10 +162,12 @@ def generate_report(image_path):
         scene_caption = scene_caption[:300] + "..."
 
     print("\n[5] AI vs Real Image Detection...")
-    authenticity_result, authenticity_confidence = predict_authenticity(
-        image_path
-    )
-
+    try:
+        authenticity_result, authenticity_confidence = predict_authenticity(image_path)
+    except Exception as e:
+        print("Authenticity failed:", e)
+    authenticity_result = "Unknown"
+    authenticity_confidence = 0
     object_names = [obj["object"] for obj in objects]
     objects_string = ", ".join(object_names)
 

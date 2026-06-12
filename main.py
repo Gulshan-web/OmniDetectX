@@ -6,6 +6,8 @@ from database import create_database, save_scan
 def merge_objects(yolo_objects, open_objects):
     merged_objects = {}
 
+    MIN_CONFIDENCE = 55
+
     blocked_objects = [
         "scissors",
         "objectsery",
@@ -21,34 +23,43 @@ def merge_objects(yolo_objects, open_objects):
         "laptop": 75,
         "phone": 65,
         "cell phone": 65,
-        "charger": 35,
-        "cable": 28,
-        "mouse": 30,
-        "mousepad": 35,
-        "notebook": 35,
-        "desk": 35
+        "charger": 55,
+        "cable": 55,
+        "mouse": 75,
+        "mousepad": 75,
+        "notebook": 55,
+        "desk": 55,
+        "tie": 90
     }
 
-    for obj in yolo_objects:
-        name = obj["object"]
-        confidence = obj["confidence"]
+    def should_keep(name, confidence):
+        name = name.lower().strip()
+
+        if confidence < MIN_CONFIDENCE:
+            return False
 
         if name in blocked_objects:
-            continue
+            return False
 
         if name in strict_objects and confidence < strict_objects[name]:
+            return False
+
+        return True
+
+    for obj in yolo_objects:
+        name = obj["object"].lower().strip()
+        confidence = obj["confidence"]
+
+        if not should_keep(name, confidence):
             continue
 
         merged_objects[name] = confidence
 
     for obj in open_objects:
-        name = obj["object"]
+        name = obj["object"].lower().strip()
         confidence = obj["confidence"]
 
-        if name in blocked_objects:
-            continue
-
-        if name in strict_objects and confidence < strict_objects[name]:
+        if not should_keep(name, confidence):
             continue
 
         if name not in merged_objects:
@@ -71,7 +82,6 @@ def merge_objects(yolo_objects, open_objects):
     )
 
     return final_objects
-
 
 def generate_report(image_path):
 

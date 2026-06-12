@@ -70,7 +70,7 @@ def detect_objects_image(image_path, output_dir="output"):
 
 
 if __name__ == "__main__":
-    image_path = "input/sample.jpg"
+    image_path = r"static\uploads\WhatsApp_Image_2026-06-01_at_10.33.02_PM.jpeg"
 
     objects, output_path = detect_objects_image(
         image_path

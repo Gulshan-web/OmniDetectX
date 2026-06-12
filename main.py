@@ -20,6 +20,7 @@ def merge_objects(yolo_objects, open_objects):
     ]
 
     strict_objects = {
+        "person":40,
         "laptop": 75,
         "phone": 65,
         "cell phone": 65,

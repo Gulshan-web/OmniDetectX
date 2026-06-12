@@ -6,61 +6,47 @@ from database import create_database, save_scan
 def merge_objects(yolo_objects, open_objects):
     merged_objects = {}
 
-    MIN_CONFIDENCE = 55
-
-    blocked_objects = [
-        "scissors",
-        "objectsery",
-        "tools",
-        "pad",
-        "charge adapter",
-        "objects objects stationery",
-        "stationery",
-        "person"
-    ]
-
-    strict_objects = {
-        "person":40,
-        "laptop": 75,
-        "phone": 65,
-        "cell phone": 65,
-        "charger": 55,
-        "cable": 55,
-        "mouse": 75,
-        "mousepad": 75,
-        "notebook": 55,
-        "desk": 55,
-        "tie": 90
-    }
-
-    def should_keep(name, confidence):
-        name = name.lower().strip()
-
-        if confidence < MIN_CONFIDENCE:
-            return False
-
-        if name in blocked_objects:
-            return False
-
-        if name in strict_objects and confidence < strict_objects[name]:
-            return False
-
-        return True
-
+    # 1. YOLO objects always keep
     for obj in yolo_objects:
         name = obj["object"].lower().strip()
         confidence = obj["confidence"]
-
-        if not should_keep(name, confidence):
-            continue
-
         merged_objects[name] = confidence
+
+    # 2. Grounding DINO only support/extra objects
+    blocked_open_objects = [
+        "object",
+        "objects",
+        "objectsery",
+        "tools",
+        "stationery",
+        "objects objects stationery",
+        "unknown",
+        "thing",
+        "stuff",
+        "pad",
+        "charge adapter"
+    ]
+
+    open_strict_objects = {
+        "mouse": 75,
+        "mousepad": 75,
+        "tie": 90,
+        "charger": 55,
+        "cable": 55
+    }
+    
 
     for obj in open_objects:
         name = obj["object"].lower().strip()
         confidence = obj["confidence"]
 
-        if not should_keep(name, confidence):
+        if name in blocked_open_objects:
+            continue
+
+        if confidence < 55:
+            continue
+
+        if name in open_strict_objects and confidence < open_strict_objects[name]:
             continue
 
         if name not in merged_objects:
@@ -76,13 +62,11 @@ def merge_objects(yolo_objects, open_objects):
         for name, confidence in merged_objects.items()
     ]
 
-    final_objects = sorted(
+    return sorted(
         final_objects,
         key=lambda x: x["confidence"],
         reverse=True
     )
-
-    return final_objects
 
 def generate_report(image_path):
 

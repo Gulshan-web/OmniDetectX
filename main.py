@@ -153,8 +153,8 @@ def generate_report(image_path):
             print("BLIP failed:", e)
             scene_caption = "Scene understanding failed"
 
-    if len(scene_caption) > 300:
-        scene_caption = scene_caption[:300] + "..."
+    if len(scene_caption) > 1000:
+        scene_caption = scene_caption[:1000] + "..."
 
     print("\n[5] AI vs Real Image Detection...")
     try:
@@ -251,6 +251,16 @@ def generate_report(image_path):
         file.write(report)
 
     print(report)
+    return {
+    "objects": objects,
+    "printed_text": printed_text,
+    "handwriting_text": handwriting_text,
+    "scene_caption": scene_caption,
+    "authenticity_result": authenticity_result,
+    "authenticity_confidence": authenticity_confidence,
+    "smart_summary": smart_summary,
+    "report": report
+    }
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ def detect_objects_image(image_path, output_dir="output"):
 
     results = yolo_model(
         image_path,
-        conf=0.50,
+        conf=0.25,
         iou=0.35,
         max_det=30,
         imgsz=960

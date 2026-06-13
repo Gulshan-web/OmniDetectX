@@ -1,10 +1,19 @@
-venv/
-__pycache__/
+# Models
+models/
+backup_models/
+*.pt
 
-static/uploads/
+# Training scripts
+authenticity_train.py
+authenticity_train_v2.py
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Output files
+output/
 static/results/
 
-output/
-
-*.db
-*.pyc
+# Virtual environment
+venv/

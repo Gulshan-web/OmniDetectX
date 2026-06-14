@@ -98,8 +98,6 @@ def generate_report(image_path):
     try:
         from ocr_detector import extract_text
         printed_text = extract_text(image_path)
-        print("OCR DEBUG:", printed_text, flush=True)
-        print("OCR COUNT:", len(printed_text), flush=True)
     
     except Exception as e:
         print("OCR failed:", e, flush=True)
@@ -159,14 +157,17 @@ def generate_report(image_path):
     if len(scene_caption) > 1000:
         scene_caption = scene_caption[:1000] + "..."
 
-    print("\n[5] AI vs Real Image Detection...")
+    print("\n[5] AI vs Real Image Detection...", flush=True)
     try:
         from authenticity_predict import predict_authenticity
+        print("Authenticity module imported", flush=True)
         authenticity_result, authenticity_confidence = predict_authenticity(
             image_path
         )
+        print("AUTH RESULT:", authenticity_result, flush=True)
+        print("AUTH CONF:", authenticity_confidence, flush=True)
     except Exception as e:
-        print("Authenticity failed:", e)
+        print("Authenticity failed:", str(e), flush=True)
         authenticity_result = "Unknown"
         authenticity_confidence = 0
 

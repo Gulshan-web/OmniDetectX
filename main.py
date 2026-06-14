@@ -94,12 +94,15 @@ def generate_report(image_path):
         objects = yolo_objects
         open_object_output = None
 
-    print("\n[2] Printed Text OCR...")
+    print("\n[2] Printed Text OCR...", flush=True)
     try:
         from ocr_detector import extract_text
         printed_text = extract_text(image_path)
+        print("OCR DEBUG:", printed_text, flush=True)
+        print("OCR COUNT:", len(printed_text), flush=True)
+    
     except Exception as e:
-        print("OCR failed:", e)
+        print("OCR failed:", e, flush=True)
         printed_text = []
 
     print("\n[3] Handwriting Recognition...")

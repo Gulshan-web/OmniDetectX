@@ -6,13 +6,16 @@
     <title>OmniDetectX Result</title>
 
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background:
                 radial-gradient(circle at top right, rgba(56,189,248,0.18), transparent 35%),
+                radial-gradient(circle at bottom left, rgba(14,165,233,0.12), transparent 35%),
                 linear-gradient(135deg, #020617, #0f172a);
             color: white;
             padding: 28px;
@@ -35,21 +38,32 @@
 
         .dashboard {
             display: grid;
-            grid-template-columns: 1fr 1fr 1.3fr;
+            grid-template-columns: 1fr 1fr 1.35fr;
             gap: 22px;
-            max-width: 1500px;
+            max-width: 1550px;
             margin: auto;
+            align-items: start;
         }
 
         .card {
-            background: rgba(15, 23, 42, 0.94);
+            background: rgba(15, 23, 42, 0.88);
             border: 1px solid rgba(148, 163, 184, 0.22);
             border-radius: 22px;
             padding: 22px;
             box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+            backdrop-filter: blur(14px);
         }
 
-        .card h2 {
+        .inner-card {
+            background: rgba(2, 6, 23, 0.48);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 18px;
+            padding: 18px;
+            margin-top: 16px;
+        }
+
+        .card h2,
+        .inner-card h2 {
             margin-top: 0;
             color: #e0f2fe;
             font-size: 21px;
@@ -59,18 +73,11 @@
             width: 100%;
             border-radius: 16px;
             border: 1px solid #1e293b;
+            transition: 0.25s ease;
         }
 
-        pre {
-            white-space: pre-wrap;
-            line-height: 1.65;
-            color: #e2e8f0;
-            font-size: 14px;
-            background: #020617;
-            padding: 18px;
-            border-radius: 16px;
-            border: 1px solid #1e293b;
-            overflow-x: auto;
+        img:hover {
+            transform: scale(1.02);
         }
 
         .btn-row {
@@ -88,6 +95,11 @@
             text-decoration: none;
             border-radius: 12px;
             font-weight: bold;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
         }
 
         .btn.secondary {
@@ -117,16 +129,6 @@
             margin-bottom: 5px;
         }
 
-        .section {
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-weight: bold;
-            color: #38bdf8;
-            margin-bottom: 8px;
-        }
-
         .tag {
             display: inline-block;
             margin: 5px 5px 0 0;
@@ -136,6 +138,84 @@
             border: 1px solid rgba(148,163,184,0.2);
             color: #cbd5e1;
             font-size: 13px;
+        }
+
+        .auth-box {
+            padding: 20px;
+            border-radius: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .real {
+            background: rgba(20,83,45,0.9);
+        }
+
+        .fake {
+            background: rgba(127,29,29,0.9);
+        }
+
+        .unknown {
+            background: rgba(55,65,81,0.9);
+        }
+
+        .confidence {
+            margin-top: 8px;
+            font-size: 18px;
+            color: #e2e8f0;
+        }
+
+        .bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 999px;
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+            border-radius: 999px;
+        }
+
+        .real-fill {
+            background: #22c55e;
+        }
+
+        .fake-fill {
+            background: #ef4444;
+        }
+
+        .unknown-fill {
+            background: #94a3b8;
+        }
+
+        .object-row {
+            margin-bottom: 14px;
+        }
+
+        .object-top {
+            display: flex;
+            justify-content: space-between;
+            color: #e2e8f0;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .object-fill {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+        }
+
+        .muted {
+            color: #94a3b8;
+            line-height: 1.7;
+        }
+
+        .summary-text {
+            line-height: 1.8;
+            color: #e2e8f0;
         }
 
         @media (max-width: 1100px) {
@@ -170,18 +250,18 @@
 
     {% if detected_image_path %}
     <div class="card">
-        <h2>Detected Objects</h2>
+        <h2>Detected Objects Image</h2>
         <img src="{{ detected_image_path }}" alt="Detected Objects Image">
-        <p style="color:#94a3b8; line-height:1.6;">
+
+        <p class="muted">
             This image shows the detected objects with bounding boxes generated by the AI model.
         </p>
+
         <div class="btn-row">
-    <a class="btn secondary"
-       href="{{ detected_image_path }}"
-       target="_blank">
-       Open Detected Image
-    </a>
-</div>
+            <a class="btn secondary" href="{{ detected_image_path }}" target="_blank">
+                Open Detected Image
+            </a>
+        </div>
     </div>
     {% endif %}
 
@@ -210,105 +290,92 @@
             </div>
         </div>
 
-        <div class="card">
-    <h2>Objects Detected</h2>
+        <div class="inner-card">
+            <h2>🤖 Authenticity Analysis</h2>
 
-    {% for obj in objects %}
-        <span class="tag">
-            {{ obj.object }}
-            ({{ obj.confidence }}%)
-        </span>
-    {% endfor %}
-</div>
+            {% if "real" in authenticity.lower() %}
+                <div class="auth-box real">
+                    REAL IMAGE
+                    <div class="confidence">{{ confidence }}%</div>
+                    <div class="bar">
+                        <div class="fill real-fill" style="width: {{ confidence }}%;"></div>
+                    </div>
+                </div>
 
-<div class="card">
-    <h2>Printed Text</h2>
+            {% elif "fake" in authenticity.lower() or "ai" in authenticity.lower() %}
+                <div class="auth-box fake">
+                    AI GENERATED
+                    <div class="confidence">{{ confidence }}%</div>
+                    <div class="bar">
+                        <div class="fill fake-fill" style="width: {{ confidence }}%;"></div>
+                    </div>
+                </div>
 
-    {% if printed_text %}
-        {% for item in printed_text %}
-            <div class="tag">
-                {{ item.text }}
-            </div>
-        {% endfor %}
-    {% else %}
-        No text detected
-    {% endif %}
-</div>
+            {% else %}
+                <div class="auth-box unknown">
+                    UNKNOWN
+                    <div class="confidence">0%</div>
+                    <div class="bar">
+                        <div class="fill unknown-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
 
-<div class="card">
-    <h2>Handwriting</h2>
-    <p>{{ handwriting }}</p>
-</div>
+        <div class="inner-card">
+            <h2>📦 Objects Detected</h2>
 
-<div class="card">
-    <h2>Scene Understanding</h2>
-    <p>{{ scene }}</p>
-</div>
+            {% if objects %}
+                {% for obj in objects %}
+                    <div class="object-row">
+                        <div class="object-top">
+                            <span>{{ obj.object }}</span>
+                            <span>{{ obj.confidence }}%</span>
+                        </div>
+                        <div class="bar">
+                            <div class="fill object-fill" style="width: {{ obj.confidence }}%;"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="muted">No objects detected</p>
+            {% endif %}
+        </div>
+
+        <div class="inner-card">
+            <h2>📝 Printed Text</h2>
+
+            {% if printed_text %}
+                {% for item in printed_text %}
+                    <span class="tag">
+                        {{ item.text }}
+                    </span>
+                {% endfor %}
+            {% else %}
+                <p class="muted">No text detected</p>
+            {% endif %}
+        </div>
+
+        <div class="inner-card">
+            <h2>✍ Handwriting</h2>
+            <p class="muted">{{ handwriting }}</p>
+        </div>
+
+        <div class="inner-card">
+            <h2>🖼 Scene Understanding</h2>
+            <p class="summary-text">{{ scene }}</p>
+        </div>
+
+        <div class="inner-card">
+            <h2>📋 AI Summary</h2>
+            <p class="summary-text">{{ summary }}</p>
+        </div>
+
         <div class="btn-row">
             <a class="btn" href="/">Analyze Another</a>
         </div>
     </div>
 
-</div>
-<div class="card">
-
-    <h2>Authenticity Analysis</h2>
-
-    {% if "real" in authenticity.lower() %}
-
-        <div style="
-            background:#14532d;
-            color:white;
-            padding:18px;
-            border-radius:15px;
-            font-size:22px;
-            font-weight:bold;
-            text-align:center;
-        ">
-            REAL IMAGE
-            <br>
-            {{ confidence }}%
-        </div>
-
-    {% elif "fake" in authenticity.lower() or "ai" in authenticity.lower() %}
-
-        <div style="
-            background:#7f1d1d;
-            color:white;
-            padding:18px;
-            border-radius:15px;
-            font-size:22px;
-            font-weight:bold;
-            text-align:center;
-        ">
-            AI GENERATED
-            <br>
-            {{ confidence }}%
-        </div>
-
-    {% else %}
-
-        <div style="
-            background:#374151;
-            color:white;
-            padding:18px;
-            border-radius:15px;
-            text-align:center;
-        ">
-            UNKNOWN
-        </div>
-
-    {% endif %}
-</div>
-<div class="card">
-    <h2>AI Summary</h2>
-
-    <p style="
-        line-height:1.8;
-        color:#e2e8f0;
-    ">
-        {{ summary }}
-    </p>
 </div>
 
 </body>

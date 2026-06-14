@@ -17,3 +17,10 @@ static/results/
 
 # Virtual environment
 venv/
+omnidetect.db
+static/uploads/
+static/results/
+backup_models/
+yolov8m.pt
+authenticity_train.py
+authenticity_train_v2.py

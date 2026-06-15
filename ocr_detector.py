@@ -19,7 +19,6 @@ def clean_ocr_text(text):
     text = text.strip()
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"[#_~`|]", "", text)
-
     text = text.replace("0", "o")
 
     letters_only = text.replace(" ", "")
@@ -31,19 +30,14 @@ def clean_ocr_text(text):
     ):
         text = letters_only
 
-        text = text.replace("0", "o")
+    if text.lower() == "ttamed":
+        text = "Tamed"
 
-        if text.lower() == "ttamed":
-            text = "Tamed"
-            
-        if text.lower() == "roubles":
-            text = "Troubles"
-        
-        if text.lower() == "ttamed":
-            text = "Tamed"
-            
-        if text.lower() == "bott:":
-            text = "both:"
+    if text.lower() in ["roubles", "(roubles,", "(roubles ,"]:
+        text = "Troubles"
+
+    if text.lower() == "bott:":
+        text = "both:"
 
     return text.strip()
 
@@ -82,7 +76,7 @@ def is_garbage_text(text):
         for c in text
     )
 
-    if special_chars / len(text) > 0.35:
+    if special_chars / len(text) > 0.45:
         return True
 
     if len(text) > 10 and " " not in text:
@@ -207,6 +201,12 @@ def extract_text(image_path):
 
         seen_keys.append(key)
         final_texts.append(item)
+
+    final_texts = sorted(
+        final_texts,
+        key=lambda x: x["confidence"],
+        reverse=True
+    )
 
     return final_texts
 

@@ -18,8 +18,9 @@ def get_reader():
 def clean_ocr_text(text):
     text = text.strip()
     text = re.sub(r"\s+", " ", text)
-
     text = re.sub(r"[#_~`|]", "", text)
+
+    text = text.replace("0", "o")
 
     letters_only = text.replace(" ", "")
 
@@ -29,6 +30,20 @@ def clean_ocr_text(text):
         and len(text.split()) > 1
     ):
         text = letters_only
+
+        text = text.replace("0", "o")
+
+        if text.lower() == "ttamed":
+            text = "Tamed"
+            
+        if text.lower() == "roubles":
+            text = "Troubles"
+        
+        if text.lower() == "ttamed":
+            text = "Tamed"
+            
+        if text.lower() == "bott:":
+            text = "both:"
 
     return text.strip()
 
@@ -126,6 +141,9 @@ def run_ocr_on_image(image):
     texts = []
 
     for item in results:
+        if len(item) < 3:
+            continue
+
         text = item[1].strip()
         confidence = round(float(item[2]) * 100, 2)
 
@@ -168,12 +186,6 @@ def extract_text(image_path):
         texts = run_ocr_on_image(variant)
         all_texts.extend(texts)
 
-    all_texts = sorted(
-        all_texts,
-        key=lambda x: x["confidence"],
-        reverse=True
-    )
-
     final_texts = []
     seen_keys = []
 
@@ -186,7 +198,7 @@ def extract_text(image_path):
         is_duplicate = False
 
         for existing_key in seen_keys:
-            if fuzz.ratio(key, existing_key) > 90:
+            if fuzz.ratio(key, existing_key) > 85:
                 is_duplicate = True
                 break
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Processing - OmniDetectX</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #020617, #0f172a);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .box {
+            max-width: 520px;
+            padding: 35px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148,163,184,0.25);
+            border-radius: 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 6px solid #1e293b;
+            border-top: 6px solid #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 22px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        h1 {
+            color: #38bdf8;
+        }
+
+        p {
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        .small {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <div class="spinner"></div>
+
+    <h1>Analyzing Image...</h1>
+
+    <p>
+        OmniDetectX is processing your image in the background.
+        You can keep this page open. If your phone screen turns off,
+        reopen the page and wait for the result.
+    </p>
+
+    <p class="small" id="statusText">
+        Starting analysis...
+    </p>
+</div>
+
+<script>
+    const jobId = "{{ job_id }}";
+
+    function checkStatus() {
+        fetch(`/job-status/${jobId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "done") {
+                    window.location.href = `/result/${jobId}`;
+                } else if (data.status === "error") {
+                    document.getElementById("statusText").innerText =
+                        "Error: " + data.error;
+                } else {
+                    document.getElementById("statusText").innerText =
+                        "Current status: " + data.status;
+                    setTimeout(checkStatus, 3000);
+                }
+            })
+            .catch(() => {
+                document.getElementById("statusText").innerText =
+                    "Waiting for server response...";
+                setTimeout(checkStatus, 5000);
+            });
+    }
+
+    checkStatus();
+</script>
+
+</body>
+</html>

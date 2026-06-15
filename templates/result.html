@@ -129,17 +129,6 @@
             margin-bottom: 5px;
         }
 
-        .tag {
-            display: inline-block;
-            margin: 5px 5px 0 0;
-            padding: 7px 11px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(148,163,184,0.2);
-            color: #cbd5e1;
-            font-size: 13px;
-        }
-
         .auth-box {
             padding: 20px;
             border-radius: 18px;
@@ -216,6 +205,16 @@
         .summary-text {
             line-height: 1.8;
             color: #e2e8f0;
+        }
+
+        .ocr-box {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 14px;
+            padding: 15px;
+            color: #e2e8f0;
+            line-height: 1.8;
+            word-spacing: 4px;
         }
 
         @media (max-width: 1100px) {
@@ -346,11 +345,11 @@
             <h2>📝 Printed Text</h2>
 
             {% if printed_text %}
-                {% for item in printed_text %}
-                    <span class="tag">
+                <div class="ocr-box">
+                    {% for item in printed_text %}
                         {{ item.text }}
-                    </span>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             {% else %}
                 <p class="muted">No text detected</p>
             {% endif %}

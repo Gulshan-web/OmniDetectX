@@ -239,13 +239,16 @@
 <div class="dashboard">
 
     <div class="card">
-        <h2>Uploaded Image</h2>
-        <img src="{{ image_path }}" alt="Uploaded Image">
+    <h2>Uploaded Image</h2>
 
-        <div class="btn-row">
-            <a class="btn secondary" href="{{ image_path }}" target="_blank">Open Image</a>
-        </div>
+    <img src="/{{ image_path }}" alt="Uploaded Image">
+
+    <div class="btn-row">
+        <a class="btn secondary" href="/{{ image_path }}" target="_blank">
+            Open Image
+        </a>
     </div>
+</div>
 
     {% if detected_image_path %}
     <div class="card">

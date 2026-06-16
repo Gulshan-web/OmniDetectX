@@ -87,6 +87,19 @@ def is_garbage_text(text):
 
         if vowels < 3:
             return True
+        
+    letters = sum(c.isalpha() for c in text)
+    digits = sum(c.isdigit() for c in text)
+    special_chars = sum(
+        not c.isalnum() and not c.isspace()
+        for c in text
+        )
+    
+    if len(text) <= 5 and (digits > 0 or special_chars > 0):
+        return True
+    
+    if len(text) <= 2:
+        return True
 
     return False
 
@@ -141,7 +154,7 @@ def run_ocr_on_image(image):
         text = item[1].strip()
         confidence = round(float(item[2]) * 100, 2)
 
-        if confidence < 40:
+        if confidence < 50:
             continue
 
         text = clean_ocr_text(text)

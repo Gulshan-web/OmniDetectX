@@ -2,7 +2,6 @@ import os
 
 from database import create_database, save_scan
 
-
 def merge_objects(yolo_objects, open_objects):
     merged_objects = {}
 
@@ -12,7 +11,7 @@ def merge_objects(yolo_objects, open_objects):
         confidence = obj["confidence"]
         merged_objects[name] = confidence
 
-    # 2. Grounding DINO only support/extra objects
+    # 2. Grounding DINO risky false positives block
     blocked_open_objects = [
         "object",
         "objects",
@@ -24,17 +23,28 @@ def merge_objects(yolo_objects, open_objects):
         "thing",
         "stuff",
         "pad",
-        "charge adapter"
+        "charge adapter",
+
+        # false positive prone
+        "bottle",
+        "dining table",
+        "table",
+        "desk"
     ]
 
+    # 3. Extra objects from Grounding DINO need high confidence
+    OPEN_MIN_CONFIDENCE = 85
+
     open_strict_objects = {
-        "mouse": 75,
-        "mousepad": 75,
+        "mouse": 85,
+        "mousepad": 85,
         "tie": 90,
-        "charger": 55,
-        "cable": 55
+        "charger": 80,
+        "cable": 80,
+        "phone": 85,
+        "cell phone": 85,
+        "laptop": 85
     }
-    
 
     for obj in open_objects:
         name = obj["object"].lower().strip()
@@ -43,7 +53,7 @@ def merge_objects(yolo_objects, open_objects):
         if name in blocked_open_objects:
             continue
 
-        if confidence < 55:
+        if confidence < OPEN_MIN_CONFIDENCE:
             continue
 
         if name in open_strict_objects and confidence < open_strict_objects[name]:

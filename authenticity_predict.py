@@ -31,15 +31,7 @@ def load_authenticity_model():
     if model is not None and idx_to_class is not None:
         return model, idx_to_class
 
-    if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError(
-            f"Authenticity model not found at {MODEL_PATH}"
-        )
-
-    checkpoint = torch.load(
-        MODEL_PATH,
-        map_location=device
-    )
+    checkpoint = torch.load(MODEL_PATH, map_location=device)
 
     idx_to_class = {
         v: k for k, v in checkpoint["class_to_idx"].items()
@@ -58,32 +50,52 @@ def predict_authenticity(image_path):
     loaded_model, loaded_idx_to_class = load_authenticity_model()
 
     image = Image.open(image_path).convert("RGB")
-    image = transform(image).unsqueeze(0).to(device)
+    input_tensor = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
-        outputs = loaded_model(image)
-        probabilities = torch.softmax(outputs, dim=1)
-        confidence, predicted = torch.max(probabilities, 1)
+        outputs = loaded_model(input_tensor)
+        probabilities = torch.softmax(outputs, dim=1)[0]
 
-    label = loaded_idx_to_class[predicted.item()].lower()
-    confidence_score = round(confidence.item() * 100, 2)
+    fake_prob = 0
+    real_prob = 0
 
-    if label == "fake":
-        result = "AI Generated / Fake Image"
-    elif label == "real":
-        result = "Real Image"
+    for idx, prob in enumerate(probabilities):
+        label = loaded_idx_to_class[idx].lower()
+
+        if label == "fake":
+            fake_prob = prob.item() * 100
+        elif label == "real":
+            real_prob = prob.item() * 100
+
+    fake_prob = round(fake_prob, 2)
+    real_prob = round(real_prob, 2)
+
+    diff = abs(fake_prob - real_prob)
+
+    # Strong decision rules
+    if fake_prob >= 75 and diff >= 20:
+        result = "AI Generated"
+        confidence = fake_prob
+
+    elif real_prob >= 85 and diff >= 30:
+        result = "Real"
+        confidence = real_prob
+
     else:
-        result = "Unknown"
+        result = "Uncertain / Needs Manual Check"
+        confidence = max(fake_prob, real_prob)
 
-    return result, confidence_score
-
+    return result, confidence
 
 if __name__ == "__main__":
-    image_path = input("Enter image path: ")
+    image_path = input("Enter image path: ").strip()
 
-    result, confidence = predict_authenticity(image_path)
+    if not os.path.exists(image_path):
+        print("Image not found:", image_path)
+    else:
+        result, confidence = predict_authenticity(image_path)
 
-    print("\nImage Authenticity Result:")
-    print("Image:", image_path)
-    print("Result:", result)
-    print("Confidence:", confidence, "%")
+        print("\nImage Authenticity Result:")
+        print("Image:", image_path)
+        print("Result:", result)
+        print("Confidence:", confidence, "%")
